@@ -6,6 +6,43 @@
 (function() {
   'use strict';
 
+  // ===== FUNÇÃO PARA BUSCAR NO BANCO DE DADOS =====
+  async function carregarTreinamentosDoBackend() {
+  try {
+    const response = await fetch("http://localhost:8080/treinamentos");
+    const dados = await response.json();
+
+    // Converter o formato do banco para o formato da tabela
+    trainings = dados.map(t => ({
+      id: t.id,
+      employeeName: t.nomeFuncionario,
+      employeeFunction: t.cargo,
+      course: t.curso,
+      completionDate: formatDateBackend(t.dataConclusao),
+      expiryDate: formatDateBackend(t.validade),
+      status: traduzirStatus(t.status)
+    }));
+
+    updateTable();
+    } catch (error) {
+      console.error("Erro ao carregar treinamentos:", error);
+    }
+  }
+
+  function formatDateBackend(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("pt-BR");
+  }
+
+  function traduzirStatus(status) {
+    switch (status) {
+      case "VALIDO": return "Válido";
+      case "VENCE_EM_BREVE": return "Vencendo";
+      case "VENCIDO": return "Vencido";
+      default: return status;
+    }
+  }
+
   // ===== ELEMENTOS DO DOM =====
   const menuToggle = document.getElementById('menuToggle');
   const sidebar = document.getElementById('sidebar');
@@ -18,54 +55,54 @@
 
   // ===== DADOS DE TREINAMENTOS (simulando banco de dados) =====
   let trainings = [
-    {
-      id: 1,
-      employeeId: 1,
-      employeeName: 'João Silva',
-      employeeFunction: 'Operador de Máquinas',
-      course: 'NR-33 Trabalhador Autorizado',
-      completionDate: '15/08/2024',
-      expiryDate: '14/08/2025',
-      instructor: 'Eng. Roberto Silva',
-      certificateNumber: 'NR33-2024-001',
-      status: 'Válido'
-    },
-    {
-      id: 2,
-      employeeId: 2,
-      employeeName: 'Maria Santos',
-      employeeFunction: 'Técnica de Laboratório',
-      course: 'NR-33 Vigias',
-      completionDate: '10/11/2023',
-      expiryDate: '09/11/2024',
-      instructor: 'Téc. Ana Paula',
-      certificateNumber: 'NR33-2023-042',
-      status: 'Vencendo'
-    },
-    {
-      id: 3,
-      employeeId: 3,
-      employeeName: 'Carlos Oliveira',
-      employeeFunction: 'Auxiliar de Manutenção',
-      course: 'NR-33 Supervisor de Entrada',
-      completionDate: '20/09/2023',
-      expiryDate: '19/09/2024',
-      instructor: 'Eng. Carlos Mendes',
-      certificateNumber: 'NR33-2023-028',
-      status: 'Vencido'
-    },
-    {
-      id: 4,
-      employeeId: 4,
-      employeeName: 'Ana Costa',
-      employeeFunction: 'Supervisora',
-      course: 'NR-33 Supervisor de Entrada',
-      completionDate: '05/06/2024',
-      expiryDate: '04/06/2025',
-      instructor: 'Eng. Carlos Mendes',
-      certificateNumber: 'NR33-2024-015',
-      status: 'Válido'
-    }
+    // {
+    //   id: 1,
+    //   employeeId: 1,
+    //   employeeName: 'João Silva',
+    //   employeeFunction: 'Operador de Máquinas',
+    //   course: 'NR-33 Trabalhador Autorizado',
+    //   completionDate: '15/08/2024',
+    //   expiryDate: '14/08/2025',
+    //   instructor: 'Eng. Roberto Silva',
+    //   certificateNumber: 'NR33-2024-001',
+    //   status: 'Válido'
+    // },
+    // {
+    //   id: 2,
+    //   employeeId: 2,
+    //   employeeName: 'Maria Santos',
+    //   employeeFunction: 'Técnica de Laboratório',
+    //   course: 'NR-33 Vigias',
+    //   completionDate: '10/11/2023',
+    //   expiryDate: '09/11/2024',
+    //   instructor: 'Téc. Ana Paula',
+    //   certificateNumber: 'NR33-2023-042',
+    //   status: 'Vencendo'
+    // },
+    // {
+    //   id: 3,
+    //   employeeId: 3,
+    //   employeeName: 'Carlos Oliveira',
+    //   employeeFunction: 'Auxiliar de Manutenção',
+    //   course: 'NR-33 Supervisor de Entrada',
+    //   completionDate: '20/09/2023',
+    //   expiryDate: '19/09/2024',
+    //   instructor: 'Eng. Carlos Mendes',
+    //   certificateNumber: 'NR33-2023-028',
+    //   status: 'Vencido'
+    // },
+    // {
+    //   id: 4,
+    //   employeeId: 4,
+    //   employeeName: 'Ana Costa',
+    //   employeeFunction: 'Supervisora',
+    //   course: 'NR-33 Supervisor de Entrada',
+    //   completionDate: '05/06/2024',
+    //   expiryDate: '04/06/2025',
+    //   instructor: 'Eng. Carlos Mendes',
+    //   certificateNumber: 'NR33-2024-015',
+    //   status: 'Válido'
+    // }
   ];
 
   let nextId = 5;
@@ -214,8 +251,11 @@
   }
 
   // ===== INICIALIZAÇÃO =====
-  updateTable();
-  console.log('✅ Treinamentos NR-33 carregado');
+  // updateTable();
+  // console.log('✅ Treinamentos NR-33 carregado');
+  carregarTreinamentosDoBackend();
+  console.log('✅ Treinamentos carregados do backend');
+
 
   // ===== EXPORTAR FUNÇÕES PARA GLOBAL =====
   window.trainings = trainings;
